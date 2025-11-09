@@ -1,1 +1,1 @@
-# M-ta-heuristique
+# Meta-heuristique
