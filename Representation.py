@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from the_algorithmes import Random_Search, drawing_path
+from the_algorithmes import *
 
 """
 The first row is special: city,lat,lon,x_km,y_km
@@ -54,7 +54,25 @@ for i in range(nbr_villes):
 
 print(Distance_Matrix)
 
-#Using Random Search
+#------- Using Random Search -------
 algiers_Index=list(Cities).index("Algiers")
-path,distance=Random_Search(Distance_Matrix,nbr_villes,algiers_Index,10000)
-drawing_path(path,Cities,x_coords,y_coords,"blue","random Search Visualization")
+path_Random,distance_Random=Random_Search(Distance_Matrix,nbr_villes,algiers_Index,10000)
+drawing_path(path_Random,Cities,x_coords,y_coords,"blue","random Search Visualization")
+city_path=[]
+for i in range(nbr_villes):
+    city_path.append(Cities[path_Random[i]])
+the_distance=Calculate_distance_path(path_Random,Distance_Matrix)
+print("\nBest random path found:")
+print(city_path)
+print(str(the_distance)+" km")
+
+#------- Using Local Search -------
+path_Local,distance_Local= Local_Search(Distance_Matrix,nbr_villes,algiers_Index,800)
+drawing_path(path_Local,Cities,x_coords,y_coords,"pink","Local Search Visualization")
+city_path2=[]
+for i in range(nbr_villes):
+    city_path2.append(Cities[path_Local[i]])
+the_distance2=Calculate_distance_path(path_Local,Distance_Matrix)
+print("\nBest Local path found:")
+print(city_path2)
+print(str(the_distance2)+" km")

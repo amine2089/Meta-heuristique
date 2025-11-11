@@ -1,6 +1,4 @@
-
 import random
-import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -51,3 +49,27 @@ def Random_Search(Distance_Matrix,nbr_villes, algiers_Index,num_iterations):
 
         num_iterations=num_iterations-1
     return best_path,best_distance
+
+#------- Local Search -------
+def swap_cities(path):
+    new_path=path.copy()
+    a,b= random.sample(range(1,len(path)),2) #we're not gonna touch the first index
+    new_path[a], new_path[b] = new_path[b], new_path[a]
+    return new_path
+def Local_Search(Distance_Matrix,nbr_villes,algiers_Index,num_iterations):
+    #Premier trajet initial aléatoire:
+    first_path,first_distance=Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
+    while num_iterations>0: #On faire des p'tites modifications sur le path
+        path= swap_cities(first_path)
+        distance=Calculate_distance_path(path,Distance_Matrix)
+        if distance<first_distance:
+            first_path=path
+            first_distance=distance
+        num_iterations=num_iterations-1
+    return first_path,first_distance
+
+#------- Hill Climbing Search -------
+def Hill_Climbing(Distance_Matrix,nbr_villes,algiers_Index):
+    return
+
+
