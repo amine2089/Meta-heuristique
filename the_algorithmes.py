@@ -71,41 +71,20 @@ def Local_Search(Distance_Matrix,nbr_villes,algiers_Index,num_iterations):
 
 
 #------- Hill Climbing -------
-def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, max_iterations):
-    #Premier trajet initial aléatoire:
-    current_path, current_distance = Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
-    iterations = 0
-    
-    while iterations < max_iterations:
-        best_neighbor = None
-        best_neighbor_distance = current_distance
-        improved = False
-        
-        # Explorer tous les voisins possibles (tous les swaps possibles)
-        # On ne touche pas à l'index 0 (Algiers)
-        for i in range(1, len(current_path)):
-            for j in range(i + 1, len(current_path)):
-                # Créer un voisin en échangeant les villes aux indices i et j
-                neighbor_path = current_path.copy()
-                neighbor_path[i], neighbor_path[j] = neighbor_path[j], neighbor_path[i]
-                neighbor_distance = Calculate_distance_path(neighbor_path, Distance_Matrix)
-                
-                # Si ce voisin est meilleur, le garder en mémoire
-                if neighbor_distance < best_neighbor_distance:
-                    best_neighbor = neighbor_path
-                    best_neighbor_distance = neighbor_distance
-                    improved = True
-        
-        # Si on a trouvé un meilleur voisin, on l'accepte
-        if improved:
-            current_path = best_neighbor
-            current_distance = best_neighbor_distance
-            iterations += 1
-        else:
-            # Pas d'amélioration trouvée, on s'arrête (on a atteint un optimum local)
-            break
-    
-    return current_path, current_distance
+def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, num_starts=10, local_iterations=500):
 
+    solutions = []  # List to store (path, distance) tuples of the local searches
 
+    for i in range(num_starts):
 
+        # Applying Local Search multiple times:
+        local_path, local_distance = Local_Search(Distance_Matrix, nbr_villes, algiers_Index, local_iterations)
+        # Step 3: Store result
+        solutions.append((local_path, local_distance))
+        print(f"Local search {i+1}: Distance = {round(local_distance, 2)}")
+
+    # Find the best among all stored solutions
+    best_solution = min(solutions, key=lambda s: s[1])
+    best_path, best_distance = best_solution
+
+    return best_path, best_distance
