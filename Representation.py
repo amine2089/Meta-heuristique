@@ -35,9 +35,9 @@ plt.scatter(x_coords, y_coords, color="red") #putting each city in its place
 
 for i in range(nbr_villes):
     plt.text(x_coords[i]+1, y_coords[i]+1, Cities[i],fontsize=7) #adding the name of each city
-plt.title("LES WILAYAS D'ALGERIE",fontsize=20, family="Arial",color="black")
-plt.xlabel("X Coordonnées",fontsize=15,family="Arial")
-plt.ylabel("Y Cordonnées",fontsize=15,family="Arial")
+plt.title("Les Coordonnées des wilayas d'algérie",fontsize=15, family="Arial",color="black")
+plt.xlabel("X Coordonnées",fontsize=10,family="Arial")
+plt.ylabel("Y Cordonnées",fontsize=10,family="Arial")
 plt.grid(True)
 plt.show()
 
@@ -68,7 +68,7 @@ print(str(the_distance)+" km")
 
 #------- Using Local Search -------
 path_Local,distance_Local= Local_Search(Distance_Matrix,nbr_villes,algiers_Index,800)
-drawing_path(path_Local,Cities,x_coords,y_coords,"pink","Local Search Visualization")
+drawing_path(path_Local,Cities,x_coords,y_coords,"green","Local Search Visualization")
 city_path2=[]
 for i in range(nbr_villes):
     city_path2.append(Cities[path_Local[i]])
@@ -76,3 +76,14 @@ the_distance2=Calculate_distance_path(path_Local,Distance_Matrix)
 print("\nBest Local path found:")
 print(city_path2)
 print(str(the_distance2)+" km")
+
+#------- Using Hill Climbing -------
+path_Hill,distance_Hill= Hill_Climbing(Distance_Matrix,nbr_villes,algiers_Index,1000)
+drawing_path(path_Hill,Cities,x_coords,y_coords,"purple","Hill Climbing Visualization")
+city_path3=[]
+for i in range(nbr_villes):
+    city_path3.append(Cities[path_Hill[i]])
+the_distance3=Calculate_distance_path(path_Hill,Distance_Matrix)
+print("\nBest Hill Climbing path found:")
+print(city_path3)
+print(str(the_distance3)+" km")

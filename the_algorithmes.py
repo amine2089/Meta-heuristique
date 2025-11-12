@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 #creating the path in the plot
 def drawing_path(path,Cities,x_coords,y_coords,color,title):
     plt.figure()
-    plt.title(title,fontsize=20,family="Arial",color="black")
+    plt.title(title,fontsize=15,family="Arial",color="black")
     plt.scatter(x_coords, y_coords, color="red")
     for i in range(len(path)-1):
         plt.plot([x_coords[path[i]], x_coords[path[i + 1]]],
@@ -18,8 +18,8 @@ def drawing_path(path,Cities,x_coords,y_coords,color,title):
              color=color)
     for j, city in enumerate(Cities):
          plt.text(x_coords[j] + 0.15, y_coords[j] + 0.15, city, fontsize=8)
-    plt.xlabel("X Coordonnées",fontsize=15,family="Arial")
-    plt.ylabel("Y Cordonnées",fontsize=15,family="Arial")
+    plt.xlabel("X Coordonnées",fontsize=10,family="Arial")
+    plt.ylabel("Y Cordonnées",fontsize=10,family="Arial")
     plt.grid(True)
     plt.show()
 
@@ -29,6 +29,7 @@ def Calculate_distance_path(path,Distance_matrix):
         distance_path += Distance_matrix[path[i],path[i+1]]
     distance_path += Distance_matrix[path[-1], path[0]] #Return to alger
     return distance_path
+
 #----- Random Search -----
 
 def Genereate_random_path(Distance_Matrix,nbr_villes,algiers_Index):
@@ -68,8 +69,43 @@ def Local_Search(Distance_Matrix,nbr_villes,algiers_Index,num_iterations):
         num_iterations=num_iterations-1
     return first_path,first_distance
 
-#------- Hill Climbing Search -------
-def Hill_Climbing(Distance_Matrix,nbr_villes,algiers_Index):
-    return
+
+#------- Hill Climbing -------
+def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, max_iterations):
+    #Premier trajet initial aléatoire:
+    current_path, current_distance = Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
+    iterations = 0
+    
+    while iterations < max_iterations:
+        best_neighbor = None
+        best_neighbor_distance = current_distance
+        improved = False
+        
+        # Explorer tous les voisins possibles (tous les swaps possibles)
+        # On ne touche pas à l'index 0 (Algiers)
+        for i in range(1, len(current_path)):
+            for j in range(i + 1, len(current_path)):
+                # Créer un voisin en échangeant les villes aux indices i et j
+                neighbor_path = current_path.copy()
+                neighbor_path[i], neighbor_path[j] = neighbor_path[j], neighbor_path[i]
+                neighbor_distance = Calculate_distance_path(neighbor_path, Distance_Matrix)
+                
+                # Si ce voisin est meilleur, le garder en mémoire
+                if neighbor_distance < best_neighbor_distance:
+                    best_neighbor = neighbor_path
+                    best_neighbor_distance = neighbor_distance
+                    improved = True
+        
+        # Si on a trouvé un meilleur voisin, on l'accepte
+        if improved:
+            current_path = best_neighbor
+            current_distance = best_neighbor_distance
+            iterations += 1
+        else:
+            # Pas d'amélioration trouvée, on s'arrête (on a atteint un optimum local)
+            break
+    
+    return current_path, current_distance
+
 
 
