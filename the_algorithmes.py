@@ -31,11 +31,10 @@ def Calculate_distance_path(path,Distance_matrix):
     return distance_path
 
 #----- Random Search -----
-
 def Genereate_random_path(Distance_Matrix,nbr_villes,algiers_Index):
-    other_cities=[i for i in range(nbr_villes) if i != algiers_Index]
+    other_cities=[i for i in range(nbr_villes) if i != algiers_Index] #Generating a path without algiers
     random.shuffle(other_cities)
-    path=[algiers_Index]+other_cities
+    path=[algiers_Index]+other_cities #Adding algiers as the beginning
     distance_path=Calculate_distance_path(path,Distance_Matrix)
     return path,distance_path
 
@@ -70,11 +69,10 @@ def Local_Search(Distance_Matrix,nbr_villes,algiers_Index,num_iterations):
     return first_path,first_distance
 
 
-#------- Hill Climbing -------
-def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, num_starts=10, local_iterations=500):
+#------- Multi_Start Local Search -------
+def Multi_Start_Local_Search(Distance_Matrix, nbr_villes, algiers_Index, num_starts=10, local_iterations=500):
 
-    solutions = []  # List to store (path, distance) tuples of the local searches
-
+    solutions = []  # List to store solutions of the local searches
     for i in range(num_starts):
 
         # Applying Local Search multiple times:
@@ -82,9 +80,27 @@ def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, num_starts=10, loc
         # Step 3: Store result
         solutions.append((local_path, local_distance))
         print(f"Local search {i+1}: Distance = {round(local_distance, 2)}")
-
-    # Find the best among all stored solutions
+    # Finding  the best among all stored solutions
     best_solution = min(solutions, key=lambda s: s[1])
     best_path, best_distance = best_solution
 
     return best_path, best_distance
+
+#------- Hill Climbing -------
+"""
+this method doesn't guarantee the global maximum, just the local maximum
+which means it doesn't work everytime
+"""
+def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, nbr_itérations):
+    #First random solution
+    ran_path,ran_distance= Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
+    i=0
+    while i < nbr_itérations:
+     #Generating a new solution close to the old solution using swap
+     Hill_path =swap_cities(ran_path)
+     Hill_distance = Calculate_distance_path(Hill_path,Distance_Matrix)
+     if(Hill_distance<ran_distance):
+        ran_path = Hill_path
+        ran_distance = Hill_distance
+     i+=1
+    return ran_path, ran_distance

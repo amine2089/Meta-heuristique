@@ -48,7 +48,7 @@ for i in range(nbr_villes):
     for j in range(i+1,nbr_villes): #Filling only one side
         dx=x_coords[j]-x_coords[i]
         dy=y_coords[j]-y_coords[i]
-        distance= np.sqrt(dx**2 + dy**2)
+        distance= np.sqrt(dx**2 + dy**2) # La distance euclidienne
         Distance_Matrix[i][j] = distance
         Distance_Matrix[j][i] = distance
 
@@ -77,13 +77,24 @@ print("\nBest Local path found:")
 print(city_path2)
 print(str(the_distance2)+" km")
 
-#------- Using Hill Climbing -------
-path_Hill,distance_Hill= Hill_Climbing(Distance_Matrix,nbr_villes,algiers_Index,1000)
-drawing_path(path_Hill,Cities,x_coords,y_coords,"purple","Hill Climbing Visualization")
+#------- Using Multi Start Local Seach -------
+path_MT,distance_MT= Multi_Start_Local_Search(Distance_Matrix, nbr_villes, algiers_Index, 1000)
+drawing_path(path_MT,Cities,x_coords,y_coords,"purple","Multi start local search Visualization")
 city_path3=[]
 for i in range(nbr_villes):
-    city_path3.append(Cities[path_Hill[i]])
-the_distance3=Calculate_distance_path(path_Hill,Distance_Matrix)
-print("\nBest Hill Climbing path found:")
+    city_path3.append(Cities[path_MT[i]])
+the_distance3=Calculate_distance_path(path_MT,Distance_Matrix)
+print("\nBest Multi start local search found:")
 print(city_path3)
 print(str(the_distance3)+" km")
+
+#------- Using Hill Climbing -------
+path_hill,distance_hill= Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, 800)
+drawing_path(path_hill,Cities,x_coords,y_coords,"pink","Hill Climbing Visualization")
+city_path4=[]
+for i in range(nbr_villes):
+    city_path4.append(Cities[path_hill[i]])
+
+print(f"\nThe Hill Climbing path is {city_path4}")
+print("\nBest Hill Climbing search found:")
+print(str(distance_hill)+" km")
