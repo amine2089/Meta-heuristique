@@ -98,7 +98,7 @@ for i in range(nbr_villes):
 print(f"\nThe Hill Climbing path is {city_path4}")
 print("\nBest Hill Climbing search found:")
 print(str(distance_hill)+" km")
-##------- Using Simulated Annealing -------
+#------- Using Simulated Annealing -------
 
 SA_path,SA_distance=Recuit_Simulé(Distance_Matrix, nbr_villes,algiers_Index,5000)
 drawing_path(SA_path,Cities,x_coords,y_coords,"silver","Simulated Annealing Visualization")
@@ -108,3 +108,14 @@ for i in range(nbr_villes):
 print(f"\nThe Simulated Annealing path is {city_path5}")
 print("\nBest Simulated Annealing search found:")
 print(str(SA_distance)+" km")
+
+#------- Using Tabu Search -------
+
+TS_path,TS_distance=Tabu_Search(Distance_Matrix, nbr_villes, algiers_Index, 10000)
+drawing_path(TS_path,Cities,x_coords,y_coords,"gold","Tabu Search Visualization")
+city_path6=[]
+for i in range(nbr_villes):
+    city_path6.append(Cities[TS_path[i]])
+print(f"\nThe Tabu Search path is {city_path6}")
+print("\nBest Tabu Search search found:")
+print(str(TS_distance)+" km")

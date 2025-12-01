@@ -135,4 +135,48 @@ def Recuit_Simulé(Distance_Matrix, nbr_villes, algiers_Index,nbr_itération):
         nbr_itération-=1
     return base_path, base_distance
 
+#------- Tabu Search -------
+def Tabu_Search(Distance_Matrix, nbr_villes, algiers_Index, nbr_iterations):
+    # Solution initiale
+    initial_path, initial_distance = Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
+    best_path, best_distance = initial_path, initial_distance
+    # Initialisation de Tabu list
+    Tabu_list = []
+    Tabu_len = 10
+    num_neighbors = 10
+    while nbr_iterations > 0:
+        neighbors = []
+        for i in range(num_neighbors):
+            neighbor = swap_cities(initial_path)
+            neighbor_distance = Calculate_distance_path(neighbor, Distance_Matrix)
+            neighbors.append((neighbor, neighbor_distance))
+        # select best neighbor
+        best_neighbor = None
+        best_neighbor_distance = float("inf")
+        for path, dist in neighbors:
+             # allow tabu move if it beats global best
+             if path in Tabu_list and dist >= best_neighbor_distance:
+                continue
+             if dist < best_neighbor_distance:
+                best_neighbor = path
+                best_neighbor_distance = dist
+        # Move to best admissible neighbor (even if worse)
+        initial_path = best_neighbor
+        initial_distance = best_neighbor_distance
+        #updating the best path
+        if initial_distance < best_distance:
+           best_path = initial_path
+           best_distance = initial_distance
+           Tabu_list.append(initial_path)
+        if len(Tabu_list) > Tabu_len:
+           Tabu_list.remove(Tabu_list[0])
+
+        nbr_iterations -= 1
+
+    return best_path, best_distance
+
+
+
+
+
 
