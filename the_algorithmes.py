@@ -1,6 +1,7 @@
+import math
 import random
 import matplotlib.pyplot as plt
-
+from fontTools.misc.bezierTools import epsilon
 
 
 #creating the path in the plot
@@ -104,3 +105,34 @@ def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, nbr_itérations):
         ran_distance = Hill_distance
      i+=1
     return ran_path, ran_distance
+
+#------- Recuit Simulé -------
+def Diminuer_T(T0):
+    alpha=0.9995
+    T=alpha*T0
+    return T
+
+def Recuit_Simulé(Distance_Matrix, nbr_villes, algiers_Index,nbr_itération):
+    #Solution de base
+    base_path,base_distance=Genereate_random_path(Distance_Matrix,nbr_villes, algiers_Index)
+    T = 1000  # Température initiale
+    epsiloon = 1e-6 #Tmin
+    while nbr_itération>0 and T>epsiloon:
+        RS_path=swap_cities(base_path)
+        RS_distance = Calculate_distance_path(RS_path,Distance_Matrix)
+        DELTA= RS_distance-base_distance
+        if DELTA<0:
+            base_path=RS_path
+            base_distance=RS_distance
+        else:
+            #Accept avec proba P= exp(-delta/T), the proba chooses if we take the worst value or not
+            P=math.exp(-DELTA/T)
+            if random.random()<P:
+                base_path=RS_path
+                base_distance=RS_distance
+        # refroidissement
+        T=Diminuer_T(T)
+        nbr_itération-=1
+    return base_path, base_distance
+
+
