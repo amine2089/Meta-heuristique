@@ -220,10 +220,5 @@ After running the script, compare the printed distances to see which algorithm p
 - **Tabu Search**: Good for avoiding local optima
 - **Genetic Algorithm**: Good for diverse exploration
 
-## 📧 Contact
 
-For questions or issues, please refer to the code comments or create an issue in the repository.
 
----
-
-**Note**: Make sure to update the CSV file path in `Representation.py` (line 19) to match your system's file location.
