@@ -119,3 +119,13 @@ for i in range(nbr_villes):
 print(f"\nThe Tabu Search path is {city_path6}")
 print("\nBest Tabu Search search found:")
 print(str(TS_distance)+" km")
+
+#------- Using Genetic Algorithm -------
+GA_path,GA_distance=Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index, 0.02, 40, 200)
+drawing_path(GA_path,Cities,x_coords,y_coords,"orange","Genetic Algorithm Visualization")
+city_path7=[]
+for i in range(nbr_villes):
+    city_path7.append(Cities[GA_path[i]])
+print(f"\nThe Genetic Algorithm path is {city_path7}")
+print("\nBest Genetic Algorithm search found:")
+print(str(GA_distance)+" km")

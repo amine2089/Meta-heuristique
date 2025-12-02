@@ -136,47 +136,163 @@ def Recuit_Simulé(Distance_Matrix, nbr_villes, algiers_Index,nbr_itération):
     return base_path, base_distance
 
 #------- Tabu Search -------
-def Tabu_Search(Distance_Matrix, nbr_villes, algiers_Index, nbr_iterations):
-    # Solution initiale
-    initial_path, initial_distance = Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
-    best_path, best_distance = initial_path, initial_distance
-    # Initialisation de Tabu list
-    Tabu_list = []
-    Tabu_len = 10
-    num_neighbors = 10
-    while nbr_iterations > 0:
-        neighbors = []
+def Tabu_Search(Distance_Matrix, nbr_villes, algiers_Index,nbr_iterations):
+    #Solution initiale
+    initial_path,initial_distance=Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)
+    best_path,best_distance=initial_path,initial_distance
+    #Initialisation de Tabu list
+    Tabu_list=[]
+    Tabu_len=10
+    num_neighbors=10
+    while nbr_iterations>0:
+        neighbors=[]
         for i in range(num_neighbors):
-            neighbor = swap_cities(initial_path)
-            neighbor_distance = Calculate_distance_path(neighbor, Distance_Matrix)
-            neighbors.append((neighbor, neighbor_distance))
-        # select best neighbor
+            neighbor=swap_cities(initial_path)
+            neighbor_distance=Calculate_distance_path(neighbor,Distance_Matrix)
+            neighbors.append((neighbor,neighbor_distance))
+        #select best neighbor
         best_neighbor = None
         best_neighbor_distance = float("inf")
-        for path, dist in neighbors:
-             # allow tabu move if it beats global best
-             if path in Tabu_list and dist >= best_neighbor_distance:
-                continue
-             if dist < best_neighbor_distance:
-                best_neighbor = path
-                best_neighbor_distance = dist
+        for path,dist in neighbors:
+                #allow tabu move if it beats global best
+                if path in Tabu_list and dist>=best_neighbor_distance:
+                    continue
+                if dist<best_neighbor_distance:
+                    best_neighbor=path
+                    best_neighbor_distance=dist
         # Move to best admissible neighbor (even if worse)
         initial_path = best_neighbor
         initial_distance = best_neighbor_distance
-        #updating the best path
-        if initial_distance < best_distance:
-           best_path = initial_path
-           best_distance = initial_distance
-           Tabu_list.append(initial_path)
-        if len(Tabu_list) > Tabu_len:
-           Tabu_list.remove(Tabu_list[0])
-
+        if initial_distance<best_distance:
+            best_path=initial_path
+            best_distance=initial_distance
+        Tabu_list.append(initial_path)
+        if len(Tabu_list)>Tabu_len:
+            Tabu_list.remove(Tabu_list[0])
+        
         nbr_iterations -= 1
 
     return best_path, best_distance
 
 
+#------- Genetic Algorithm -------
 
+def Crossover(parent1, parent2, algiers_Index):
+    size=len(parent1)
+    #Choosing two random point to cut
+    a= random.randint(1,size-2)
+    b=random.randint(a+1,size-1)
+
+    #Initialize child with None values
+    child=[None]*size
+    child[0]=algiers_Index
+    child[a:b]=parent1[a:b]
+    #Filling the remaining places
+    remaining=[]
+    for gene in parent2:
+        if gene not in child:
+            remaining.append(gene)
+    # Fill the None positions with remaining genes from parent2
+    position=1
+    for gene in remaining:
+        while position<size and child[position] is not None:
+            position+=1
+        if position<size:
+            child[position]=gene
+            position+=1
+    return child
+
+def Mutate(path, mutation_rate, algiers_Index):
+    mutated=path.copy()
+    for i in range(1, len(mutated)):
+        if random.random()<mutation_rate:
+            j=random.randint(1, len(mutated)-1)
+            mutated[i], mutated[j]=mutated[j], mutated[i]
+    return mutated
+def Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index,mutation_rate, population_size=40, generations=200):
+    #population size represents the number of chromosomes generated
+    # ---- Create initial population ----
+    population=[]
+    for _ in range(population_size):
+        individual=Genereate_random_path(Distance_Matrix, nbr_villes, algiers_Index)[0]
+        distance_individual=Calculate_distance_path(individual,Distance_Matrix)
+        population.append((individual,distance_individual))
+    
+    #Track best solution across all generations
+    best_path=None
+    best_distance=float("inf")
+    
+    #Evolution loop
+    for generation in range(generations):
+        #Calculating the fitness
+        Fitness_list=[]
+        total_fit=0
+        for individual,distance in population:
+            Fitness=1/distance
+            Fitness_list.append(Fitness)
+            total_fit+=Fitness
+        #Selection Probability
+        Selection_proba=[]
+        for fit in Fitness_list:
+            proba=fit/total_fit #the probability to choose a chromosome to be the father
+            Selection_proba.append(proba)
+        
+        #Create new generation
+        new_population=[]
+        
+        #Keep best individual (elitism)
+        best_individual=min(population, key=lambda x: x[1])
+        new_population.append(best_individual)
+        if best_individual[1]<best_distance:
+            best_path=best_individual[0]
+            best_distance=best_individual[1]
+        
+        #Generate rest of population through crossover and mutation
+        while len(new_population)<population_size:
+            #Selecting two parents using roulette wheel selection (inline)
+            #Select parent1
+            r1=random.random()
+            cumulative_prob1=0
+            parent1=None
+            for i, prob in enumerate(Selection_proba):
+                cumulative_prob1+=prob
+                if r1<=cumulative_prob1:
+                    parent1=population[i][0]
+                    break
+            if parent1 is None:
+                parent1=population[-1][0]  #Fallback
+            
+            #Select parent2 (ensure different from parent1)
+            parent2=None
+            while parent2 is None or parent2==parent1:
+                r2=random.random()
+                cumulative_prob2=0
+                for i, prob in enumerate(Selection_proba):
+                    cumulative_prob2+=prob
+                    if r2<=cumulative_prob2:
+                        parent2=population[i][0]
+                        break
+                if parent2 is None:
+                    parent2=population[-1][0]  #Fallback
+            
+            #Crossover to create child
+            child=Crossover(parent1, parent2, algiers_Index)
+            
+            #Mutate child
+            child=Mutate(child, mutation_rate, algiers_Index)
+            
+            #Calculate child's distance
+            child_distance=Calculate_distance_path(child, Distance_Matrix)
+            new_population.append((child, child_distance))
+        
+        #Replace old population with new population
+        population=new_population
+        
+        #Optional: print progress every 50 generations
+        if (generation+1)%50==0:
+            print(f"Generation {generation+1}: Best distance = {round(best_distance, 2)} km")
+    
+    return best_path, best_distance
 
 
 
