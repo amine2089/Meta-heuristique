@@ -1,5 +1,7 @@
 import math
 import random
+from stringprep import b1_set
+
 import matplotlib.pyplot as plt
 from fontTools.misc.bezierTools import epsilon
 
@@ -80,7 +82,6 @@ def Multi_Start_Local_Search(Distance_Matrix, nbr_villes, algiers_Index, num_sta
         local_path, local_distance = Local_Search(Distance_Matrix, nbr_villes, algiers_Index, local_iterations)
         # Step 3: Store result
         solutions.append((local_path, local_distance))
-        print(f"Local search {i+1}: Distance = {round(local_distance, 2)}")
     # Finding  the best among all stored solutions
     best_solution = min(solutions, key=lambda s: s[1])
     best_path, best_distance = best_solution
@@ -107,33 +108,37 @@ def Hill_Climbing(Distance_Matrix, nbr_villes, algiers_Index, nbr_itérations):
     return ran_path, ran_distance
 
 #------- Recuit Simulé -------
-def Diminuer_T(T0):
+def Diminuer_T(T):
     alpha=0.9995
-    T=alpha*T0
+    T=alpha*T
     return T
 
 def Recuit_Simulé(Distance_Matrix, nbr_villes, algiers_Index,nbr_itération):
     #Solution de base
-    base_path,base_distance=Genereate_random_path(Distance_Matrix,nbr_villes, algiers_Index)
+    Current_path,Current_distance=Genereate_random_path(Distance_Matrix,nbr_villes, algiers_Index)
+    Best_path,Best_Distance=Current_path,Current_distance
     T = 1000  # Température initiale
     epsiloon = 1e-6 #Tmin
     while nbr_itération>0 and T>epsiloon:
-        RS_path=swap_cities(base_path)
+        RS_path=swap_cities(Current_path)
         RS_distance = Calculate_distance_path(RS_path,Distance_Matrix)
-        DELTA= RS_distance-base_distance
+        DELTA= RS_distance-Current_distance
         if DELTA<0:
-            base_path=RS_path
-            base_distance=RS_distance
+            Current_path=RS_path
+            Current_distance=RS_distance
         else:
             #Accept avec proba P= exp(-delta/T), the proba chooses if we take the worst value or not
             P=math.exp(-DELTA/T)
             if random.random()<P:
-                base_path=RS_path
-                base_distance=RS_distance
+                Current_path=RS_path
+                Current_distance=RS_distance
+        if Current_distance < Best_Distance:
+            Best_path = Current_path
+            Best_Distance = Current_distance
         # refroidissement
         T=Diminuer_T(T)
         nbr_itération-=1
-    return base_path, base_distance
+    return Best_path, Best_Distance
 
 #------- Tabu Search -------
 def Tabu_Search(Distance_Matrix, nbr_villes, algiers_Index,nbr_iterations):
@@ -155,7 +160,7 @@ def Tabu_Search(Distance_Matrix, nbr_villes, algiers_Index,nbr_iterations):
         best_neighbor_distance = float("inf")
         for path,dist in neighbors:
                 #allow tabu move if it beats global best
-                if path in Tabu_list and dist>=best_neighbor_distance:
+                if path in Tabu_list and dist>=best_distance:
                     continue
                 if dist<best_neighbor_distance:
                     best_neighbor=path
@@ -189,7 +194,7 @@ def Crossover(parent1, parent2, algiers_Index):
     child[a:b]=parent1[a:b]
     #Filling the remaining places
     remaining=[]
-    for gene in parent2:
+    for gene in parent2[1:]:
         if gene not in child:
             remaining.append(gene)
     # Fill the None positions with remaining genes from parent2
@@ -202,7 +207,7 @@ def Crossover(parent1, parent2, algiers_Index):
             position+=1
     return child
 
-def Mutate(path, mutation_rate, algiers_Index):
+def Mutate(path, mutation_rate):
     mutated=path.copy()
     for i in range(1, len(mutated)):
         if random.random()<mutation_rate:
@@ -240,7 +245,7 @@ def Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index,mutation_rate, 
         #Create new generation
         new_population=[]
         
-        #Keep best individual (elitism)
+        #Keep best individual
         best_individual=min(population, key=lambda x: x[1])
         new_population.append(best_individual)
         if best_individual[1]<best_distance:
@@ -259,8 +264,7 @@ def Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index,mutation_rate, 
                 if r1<=cumulative_prob1:
                     parent1=population[i][0]
                     break
-            if parent1 is None:
-                parent1=population[-1][0]  #Fallback
+
             
             #Select parent2 (ensure different from parent1)
             parent2=None
@@ -272,14 +276,13 @@ def Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index,mutation_rate, 
                     if r2<=cumulative_prob2:
                         parent2=population[i][0]
                         break
-                if parent2 is None:
-                    parent2=population[-1][0]  #Fallback
+
             
             #Crossover to create child
             child=Crossover(parent1, parent2, algiers_Index)
             
             #Mutate child
-            child=Mutate(child, mutation_rate, algiers_Index)
+            child=Mutate(child, mutation_rate)
             
             #Calculate child's distance
             child_distance=Calculate_distance_path(child, Distance_Matrix)
@@ -288,7 +291,7 @@ def Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index,mutation_rate, 
         #Replace old population with new population
         population=new_population
         
-        #Optional: print progress every 50 generations
+        #print progress every 50 generations
         if (generation+1)%50==0:
             print(f"Generation {generation+1}: Best distance = {round(best_distance, 2)} km")
     

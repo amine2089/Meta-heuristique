@@ -121,7 +121,7 @@ print("\nBest Tabu Search search found:")
 print(str(TS_distance)+" km")
 
 #------- Using Genetic Algorithm -------
-GA_path,GA_distance=Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index, 0.02, 40, 200)
+GA_path,GA_distance=Genetic_Algorithm(Distance_Matrix, nbr_villes, algiers_Index, 0.02, 40, 700)
 drawing_path(GA_path,Cities,x_coords,y_coords,"orange","Genetic Algorithm Visualization")
 city_path7=[]
 for i in range(nbr_villes):
